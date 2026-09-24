@@ -9,10 +9,6 @@ import java.util.Map;
 class Scanner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
-    private int start = 0;
-    private int current = 0;
-    private int line = 1;
-
     private static final Map<String, TokenType> keywords;
 
     static {
@@ -35,6 +31,10 @@ class Scanner {
         keywords.put("while", WHILE);
     }
 
+    private int start = 0;
+    private int current = 0;
+    private int line = 1;
+
     Scanner(String source) {
         this.source = source;
     }
@@ -52,6 +52,19 @@ class Scanner {
 
     private boolean isAtEnd() {
         return current >= source.length();
+    }
+
+    private char advance() {
+        return source.charAt(current++);
+    }
+
+    private void addToken(TokenType type) {
+        addToken(type, null);
+    }
+
+    private void addToken(TokenType type, Object literal) {
+        String text = source.substring(start, current);
+        tokens.add(new Token(type, text, literal, line));
     }
 
     private void scanToken() {
@@ -104,13 +117,10 @@ class Scanner {
                     // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd())
                         advance();
-                } else if (match('*')) { // Addition for Challenge Problem 4
-                    blockComment();
                 } else {
                     addToken(SLASH);
                 }
                 break;
-
             case ' ':
             case '\r':
             case '\t':
@@ -123,6 +133,12 @@ class Scanner {
             case '"':
                 string();
                 break;
+            case '?':
+                addToken(QUESTION);
+                break;
+            case ':':
+                addToken(COLON);
+                break;
             default:
                 if (isDigit(c)) {
                     number();
@@ -131,7 +147,6 @@ class Scanner {
                 } else {
                     Lox.error(line, "Unexpected character.");
                 }
-                break;
         }
     }
 
@@ -144,10 +159,6 @@ class Scanner {
         if (type == null)
             type = IDENTIFIER;
         addToken(type);
-    }
-
-    private char advance() {
-        return source.charAt(current++);
     }
 
     private void number() {
@@ -165,15 +176,6 @@ class Scanner {
 
         addToken(NUMBER,
                 Double.parseDouble(source.substring(start, current)));
-    }
-
-    private void addToken(TokenType type) {
-        addToken(type, null);
-    }
-
-    private void addToken(TokenType type, Object literal) {
-        String text = source.substring(start, current);
-        tokens.add(new Token(type, text, literal, line));
     }
 
     private boolean match(char expected) {
@@ -230,35 +232,5 @@ class Scanner {
 
     private boolean isDigit(char c) {
         return c >= '0' && c <= '9';
-    }
-
-    // Part of Solution for Problem 4
-    private void blockComment() {
-        // First, start counter and track layers
-        int nesting = 1;
-        while (nesting > 0) {
-            if (isAtEnd()) {
-                Lox.error(line, "Unfinished Block Comment");
-                return;
-            }
-
-            if (peek() == '/' && peekNext() == '*') {
-                advance();
-                advance();
-                ++nesting;
-                continue;
-            }
-            if (peek() == '*' && peekNext() == '/') {
-                advance();
-                advance();
-                --nesting;
-                continue;
-            }
-            if (peek() == '\n') {
-                ++line;
-
-            }
-            advance();
-        }
     }
 }
