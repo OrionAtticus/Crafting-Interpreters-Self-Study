@@ -1,0 +1,8 @@
+// Expected Output: outer
+
+var a = "outer";
+while (true) {
+    var a = "inner";
+    break;
+}
+print a;
