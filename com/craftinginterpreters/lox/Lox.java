@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+
 public class Lox {
     private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
@@ -26,7 +27,7 @@ public class Lox {
 
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()), false);
+        run(new String(bytes, Charset.defaultCharset()));
 
         // Indicate an error in the exit code.
         if (hadError)
@@ -44,18 +45,12 @@ public class Lox {
             String line = reader.readLine();
             if (line == null)
                 break;
-
-            // Ch 8 Problem 1, Skip semicolon
-            line = line.trim();
-            if (!line.isEmpty() && !line.endsWith(";") && !line.endsWith("}")) {
-                line = line + ";";
-            }
-            run(line, true);
+            run(line);
             hadError = false;
         }
     }
 
-    private static void run(String source, boolean isRepl) {
+    private static void run(String source) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
@@ -66,12 +61,14 @@ public class Lox {
         if (hadError)
             return;
 
-        // Ch8 Problem 1
-        if (isRepl) {
-                interpreter.interpretRepl(statements);
-        } else {
-                interpreter.interpret(statements);
-        }
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
+
+        // Stop if there was a resolution error.
+        if (hadError)
+            return;
+
+        interpreter.interpret(statements);
     }
 
     static void error(int line, String message) {

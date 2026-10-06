@@ -1,0 +1,20 @@
+// Expected Output: 1 2 3 <fn named> <fn>
+
+fun three(fn) {
+    for (var i = 1; i <= 3; i = i + 1) {
+        fn(i);
+    }
+}
+
+three(fun (a) {
+    print a;
+});
+
+fun () {};
+
+fun named(a) {
+    print a;
+}
+
+print named;
+print fun () {}; // Parse without error
