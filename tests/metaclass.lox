@@ -1,0 +1,14 @@
+class Math {
+    class square(n) {
+        return n*n;
+    }
+       class twice(n) {
+            return this.square(n) + this.square(n);
+    }
+}
+
+print Math.square(3); // Should be 9
+print Math.twice(2); // Should be 8
+Math.pi = 3.14;
+print Math.pi; // 3.14
+Math().square(3); // Should give runtime error

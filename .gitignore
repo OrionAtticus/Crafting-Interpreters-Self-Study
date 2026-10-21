@@ -1,2 +1,10 @@
 # Remove Created Java Classes
 *.class
+
+# Remove IntelliJ IDEA
+*.idea
+.idea/
+
+# Remove IntelliJ IDEA
+*.iml
+.iml/
